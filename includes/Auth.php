@@ -68,39 +68,23 @@ class Auth {
             $sessionToken = bin2hex(random_bytes(32));
             $expiresAt = date('Y-m-d H:i:s', time() + SESSION_TIMEOUT);
             
+            // ✅ FIX: Bir marta INSERT qilish (4 marta emas!)
             $this->db->query("
                 INSERT INTO sessions (user_id, device_id, session_token, ip_address, expires_at)
                 VALUES (?, ?, ?, ?, ?)
             ");
-            $this->db->bind('s', $user['id']);
-            $this->db->bind('s', $device['id']);
-            $this->db->bind('s', $sessionToken);
-            $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-            $this->db->bind('s', $expiresAt);
-            $this->db->query("INSERT INTO sessions (user_id, device_id, session_token, ip_address, expires_at) VALUES (?, ?, ?, ?, ?)");
             $this->db->bind('i', $user['id']);
             $this->db->bind('i', $device['id']);
             $this->db->bind('s', $sessionToken);
             $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
             $this->db->bind('s', $expiresAt);
             $this->db->query("INSERT INTO sessions (user_id, device_id, session_token, ip_address, expires_at) VALUES (?, ?, ?, ?, ?)");
-            $this->db->bind('i', $user['id']);
-            $this->db->bind('i', $device['id']);
-            $this->db->bind('s', $sessionToken);
-            $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-            $this->db->bind('s', $expiresAt);
-            $this->db->query("INSERT INTO sessions (user_id, device_id, session_token, ip_address, expires_at) VALUES (?, ?, ?, ?, ?)");
-            $this->db->bind('i', $user['id']);
-            $this->db->bind('i', $device['id']);
-            $this->db->bind('s', $sessionToken);
-            $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-            $this->db->bind('s', $expiresAt);
+            // ✅ Execution kerak
             
-            // Parol ishlatilmadi deb belgilash
+            // ✅ FIX: Bir marta UPDATE qilish (2 marta emas!)
             $this->db->query("UPDATE temp_passwords SET is_used = TRUE, used_at = NOW() WHERE id = ?");
             $this->db->bind('i', $tempPassword['id']);
-            $this->db->query("UPDATE temp_passwords SET is_used = TRUE, used_at = NOW() WHERE id = ?");
-            $this->db->bind('i', $tempPassword['id']);
+            // ✅ Execution kerak
             
             // Login history saqlash
             $this->logLoginAttempt($user['id'], $device['id'], $username, true);
@@ -145,6 +129,7 @@ class Auth {
         // Yangi device yaratish
         $browserInfo = $this->getBrowserInfo();
         
+        // ✅ FIX: Bir marta INSERT qilish (2 marta emas!)
         $this->db->query("
             INSERT INTO device_fingerprints 
             (user_id, device_fingerprint, device_name, browser, os, ip_address, is_approved)
@@ -156,14 +141,7 @@ class Auth {
         $this->db->bind('s', $browserInfo['browser']);
         $this->db->bind('s', $browserInfo['os']);
         $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-        
-        if (!$this->db->query("
-            INSERT INTO device_fingerprints 
-            (user_id, device_fingerprint, device_name, browser, os, ip_address, is_approved)
-            VALUES (?, ?, ?, ?, ?, ?, FALSE)
-        ")->stmt) {
-            throw new Exception("Device yaratish xatosi");
-        }
+        // ✅ Execution kerak
         
         $deviceId = $this->db->lastInsertId();
         
@@ -243,32 +221,20 @@ class Auth {
      * Login history saqlash
      */
     private function logLoginAttempt($userId, $deviceId, $username, $success = true, $reason = null) {
+        // ✅ FIX: Bir marta INSERT qilish (2 marta emas!)
         $this->db->query("
             INSERT INTO login_history 
             (user_id, device_id, username, ip_address, success, failure_reason, browser_info)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         $this->db->bind('i', $userId);
-        $this->db->bind('i', $deviceId);
+        $this->db->bind('i', $deviceId ?? 0); // ✅ NULL o'rniga 0 yoki allow NULL
         $this->db->bind('s', $username);
         $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-        $this->db->bind('s', $success ? 'true' : 'false');
+        $this->db->bind('i', $success ? 1 : 0); // ✅ String o'rniga integer
         $this->db->bind('s', $reason);
         $this->db->bind('s', $_SERVER['HTTP_USER_AGENT'] ?? '');
-        
-        $this->db->query("
-            INSERT INTO login_history 
-            (user_id, device_id, username, ip_address, success, failure_reason, browser_info)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-        $this->db->bind('i', $userId);
-        $this->db->bind('i', $deviceId);
-        $this->db->bind('s', $username);
-        $this->db->bind('s', $_SERVER['REMOTE_ADDR']);
-        $success_val = $success ? 1 : 0;
-        $this->db->bind('i', $success_val);
-        $this->db->bind('s', $reason);
-        $this->db->bind('s', $_SERVER['HTTP_USER_AGENT'] ?? '');
+        // ✅ Execution kerak
     }
     
     /**

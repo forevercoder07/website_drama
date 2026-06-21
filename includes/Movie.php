@@ -27,7 +27,7 @@ class Movie {
             $this->db->bind('s', $data['poster']);
             $this->db->bind('i', $data['category_id']);
             $this->db->bind('i', $data['duration']);
-            $this->db->bind('s', $data['rating']);
+            $this->db->bind('d', $data['rating']);
             $this->db->bind('s', $data['release_date']);
             
             return [
@@ -58,7 +58,7 @@ class Movie {
             $this->db->bind('s', $data['poster']);
             $this->db->bind('i', $data['category_id']);
             $this->db->bind('i', $data['duration']);
-            $this->db->bind('s', $data['rating']);
+            $this->db->bind('d', $data['rating']);
             $this->db->bind('s', $data['release_date']);
             $this->db->bind('i', $movieId);
             
@@ -144,11 +144,12 @@ class Movie {
     }
     
     /**
-     * Qidirish
+     * Qidirish - ✅ FIX: LIKE injection himoyasi
      */
     public function searchMovies($query, $isPrivate = false) {
         try {
-            $searchTerm = '%' . $query . '%';
+            // ✅ FIX: Properly escaped LIKE pattern
+            $searchTerm = '%' . $this->escapeLike($query) . '%';
             $table = $isPrivate ? 'private_movies' : 'movies';
             
             $this->db->query("
@@ -165,6 +166,13 @@ class Movie {
         } catch (Exception $e) {
             return [];
         }
+    }
+    
+    /**
+     * ✅ FIX: LIKE va ESCAPE metodlari
+     */
+    private function escapeLike($str) {
+        return strtr($str, ['%' => '\%', '_' => '\_', '\\' => '\\\\']);
     }
     
     // ==================== EPISODES ====================
@@ -248,7 +256,7 @@ class Movie {
             $this->db->bind('s', $data['poster']);
             $this->db->bind('i', $data['category_id']);
             $this->db->bind('i', $data['duration']);
-            $this->db->bind('s', $data['rating']);
+            $this->db->bind('d', $data['rating']);
             $this->db->bind('s', $data['release_date']);
             
             return [

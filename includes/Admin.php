@@ -23,10 +23,7 @@ class Admin {
                 return ['success' => false, 'message' => 'Foydalanuvchi yoki email allaqachon mavjud'];
             }
             
-            // Yangi user yaratish
-            $this->db->query("INSERT INTO users (username, email) VALUES (?, ?)");
-            $this->db->bind('s', $username);
-            $this->db->bind('s', $email);
+            // ✅ FIX: Bir marta INSERT qilish (2 marta emas!)
             $this->db->query("INSERT INTO users (username, email) VALUES (?, ?)");
             $this->db->bind('s', $username);
             $this->db->bind('s', $email);

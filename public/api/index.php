@@ -125,9 +125,8 @@ if ($endpoint === 'private-movies' && $method === 'GET') {
     }
     
     $page = $_GET['page'] ?? 1;
-    $movie = new Movie($db);
     
-    // Private movies uchun alohida query (jadvaldan o'qish)
+    // ✅ FIX: Private movies uchun to'g'ri query
     $db->query("
         SELECT pm.*, c.name as category_name 
         FROM private_movies pm
@@ -136,8 +135,10 @@ if ($endpoint === 'private-movies' && $method === 'GET') {
         ORDER BY pm.created_at DESC
         LIMIT ? OFFSET ?
     ");
-    $db->bind('i', 20);
-    $db->bind('i', ($page - 1) * 20);
+    $perPage = 20;
+    $offset = ($page - 1) * $perPage;
+    $db->bind('i', $perPage);
+    $db->bind('i', $offset);
     $privateMovies = $db->resultSet();
     
     echo json_encode([
@@ -247,13 +248,14 @@ if ($endpoint === 'watch-history' && $method === 'POST') {
     
     $input = json_decode(file_get_contents('php://input'), true);
     
+    // ✅ FIX: Column name - "current_time" o'rniga "watched_position"
     $db->query("
-        INSERT INTO watch_history (user_id, episode_id, current_time, duration, is_completed)
+        INSERT INTO watch_history (user_id, episode_id, watched_position, duration, is_completed)
         VALUES (?, ?, ?, ?, ?)
     ");
     $db->bind('i', $session['user_id']);
     $db->bind('i', $input['episode_id']);
-    $db->bind('i', $input['current_time']);
+    $db->bind('i', $input['watched_position'] ?? 0);
     $db->bind('i', $input['duration']);
     $db->bind('i', $input['is_completed'] ? 1 : 0);
     

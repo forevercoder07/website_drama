@@ -1,20 +1,12 @@
 <?php
 session_start();
 
-// Hozirgi fayl (index.php) public papkasida, shuning uchun 
-// bitta yuqoriga (../) chiqib, keyin kerakli papkalarga kiramiz.
+// ✅ FIX: Noto'g'ri file yo'llar - admin/index.php, admin/login.php, api/index.php qo'shimcha kerak emas!
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/Security.php';
 require_once __DIR__ . '/../includes/Auth.php';
-require_once __DIR__ . '/../includes/Admin.php';
 require_once __DIR__ . '/../includes/Movie.php';
-require_once 'admin/index.php';
-require_once 'admin/login.php';
-require_once 'api/index.php';
-require_once 'private/login.php';
-
-
 
 $db = new Database();
 $auth = new Auth($db);
@@ -453,8 +445,8 @@ $type = $_GET['type'] ?? null;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.success && data.data.users) {
-                    displayMovies(data.data.users, 'moviesContainer');
+                if (data.success && data.data) {
+                    displayMovies(data.data, 'moviesContainer');
                 }
             } catch (error) {
                 console.error('Error:', error);
