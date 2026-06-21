@@ -1,0 +1,26 @@
+/* DramaMini Styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e27;
+    color: #fff;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff4444;
+}
+
+.btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #cc0000;
+}
